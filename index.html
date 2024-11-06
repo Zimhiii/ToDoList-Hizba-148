@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="w-full min-h-screen relative h-[200vh]">
+    <header
+      class="top-0 w-full flex flex-col justify-center items-center py-8 ring-1 ring-black shadow-[0_5px_15px_0_rgba(0,0,0,0.3)]"
+    >
+      <div>
+        <h1 class="text-3xl font-semibold">My To Do List App</h1>
+        <h2 class="text-end text-sm">By Hizba-148</h2>
+      </div>
+    </header>
+
+    <main class="py-10 px-20">
+      <div class="flex flex-col gap-4 mb-6 ring-1 ring-black p-10 rounded-md">
+        <div id="form-tugas">
+          <h1 id="title-form-tugas" class="text-2xl font-semibold mb-3">
+            Add Task
+          </h1>
+          <div className="mb-2 w-full">
+            <label
+              for="tambah-tugas"
+              class="block text-[15px] md:text-[20px] font-monserrat mb-1"
+            >
+              Tambah tugas <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Masukkan Nama Tugas"
+              value=""
+              class="rounded-[4px] text-[12px] md:text-[16px] py-2 px-2 md:py-2 md:px-4 w-full active:bg-[#D9D9D9] ring-1 ring-[#000000] placeholder:text-[#000000] placeholder:text-opacity-30 placeholder:text-[10px] md:placeholder:text-[18px] placeholder:italic focus:outline-black"
+              id="tambah-tugas"
+              required
+            />
+          </div>
+          <div className="mb-2 w-full">
+            <label
+              for="tenggat-tanggal"
+              class="block text-[15px] md:text-[20px] font-monserrat mb-1"
+            >
+              Tenggat Tanggal <span class="text-red-500">*</span>
+            </label>
+            <input
+              value=""
+              type="date"
+              placeholder="Masukkan Nama Tugas"
+              class="rounded-[4px] text-[12px] md:text-[16px] py-2 px-2 md:py-2 md:px-4 w-full active:bg-[#D9D9D9] ring-1 ring-[#000000] placeholder:text-[#000000] placeholder:text-opacity-30 placeholder:text-[10px] md:placeholder:text-[18px] placeholder:italic focus:outline-black"
+              id="tenggat-tanggal"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              for="tambah-prioritas"
+              class="block text-[15px] md:text-[20px] font-monserrat mb-1"
+            >
+              <h1>Prioritas <span class="text-red-500">*</span></h1>
+            </label>
+            <select
+              id="task-priority"
+              value=""
+              class="rounded-[4px] text-[12px] md:text-[16px] py-2 px-2 md:py-2 md:px-4 w-full active:bg-[#D9D9D9] ring-1 ring-[#000000] placeholder:text-[#000000] placeholder:text-opacity-30 placeholder:text-[10px] md:placeholder:text-[18px] placeholder:italic focus:outline-black"
+              required
+            >
+              <div class="py-5">
+                <option value="Tinggi">Tinggi</option>
+                <option value="Sedang">Sedang</option>
+                <option value="Rendah">Rendah</option>
+              </div>
+            </select>
+          </div>
+        </div>
+
+        <div id="container-button" class="flex justify-start gap-4">
+          <button
+            onclick="addTask()"
+            id="button-form"
+            class="rounded-lg px-4 py-2 bg-black text-white ring-1 ring-black w-fit"
+          ></button>
+        </div>
+      </div>
+
+      <div class="py-10">
+        <div
+          class="border-b-[1px] border-black px-10 flex gap-2 py-5 items-center"
+          id="title-daftar-tugas"
+        >
+          <h1 class="text-2xl font-semibold mb-3 text-center">Daftar Tugas</h1>
+        </div>
+        <div class="py-5" id="filter-tugas"></div>
+        <div class="mb-6 border-b-[1px] border-black px-10 py-5">
+          <h2 class="text-xl font-semibold" id="task-completion-statistics">
+            Penyelesaian Tugas: 0%
+          </h2>
+        </div>
+        <div id="kumpulan-daftar-tugas" class=""></div>
+      </div>
+    </main>
+
+    <script>
+      const titleDaftarTugas = document.getElementById("title-daftar-tugas");
+      const conButtonForm = document.getElementById("container-button");
+      const containerForm = document.getElementById("form-tugas");
+
+      const buttonForm = document.getElementById("button-form");
+      buttonForm.textContent = "Add Task";
+
+      const titleForm = document.getElementById("title-form-tugas");
+
+      const editjudul = document.getElementById("tambah-tugas");
+      editjudul.value = "";
+      // const buttonForm = document.getElementById("button-form");
+      const tenggat = document.getElementById("tenggat-tanggal");
+      tenggat.value = "";
+
+      const priority = document.getElementById("task-priority");
+      priority.value = "";
+
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      const tambahTugas = document.getElementById("tambah-tugas");
+      const taskPriority = document.getElementById("task-priority");
+      const kumpulanDaftarTugas = document.getElementById(
+        "kumpulan-daftar-tugas"
+      );
+
+      const tenggatTanggal = document.getElementById("tenggat-tanggal");
+
+      const updateStatistics = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const completedTasks = tasks.filter((task) => task.completed).length;
+        const totalTasks = tasks.length;
+        const completionPercentage = totalTasks
+          ? Math.round((completedTasks / totalTasks) * 100)
+          : 0;
+
+        const taskCompletionStatistics = document.getElementById(
+          "task-completion-statistics"
+        );
+        taskCompletionStatistics.textContent = `Penyelesaian Tugas: ${completionPercentage}% (${completedTasks} dari ${totalTasks} tugas)`;
+      };
+
+      const resetTask = () => {
+        tambahTugas.value = "";
+        taskPriority.value = "";
+        tenggatTanggal.value = "";
+      };
+
+      const addTask = () => {
+        const task = {
+          id: Date.now(),
+          name: tambahTugas.value,
+          priority: taskPriority.value,
+          deadline: tenggatTanggal.value,
+          completed: false,
+        };
+
+        saveTask(task);
+
+        resetTask();
+        refreshTasks();
+      };
+
+      const saveTask = (task) => {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks.push(task);
+        displayTask(task);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      };
+
+      const countTask = document.createElement("countTask");
+      titleDaftarTugas.appendChild(countTask);
+
+      const loadTasks = () => {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        // tasks.forEach(displayTask);
+        tasks.map((task) => displayTask(task));
+        if (localStorage.getItem("tasks")) {
+          const tasks = JSON.parse(localStorage.getItem("tasks"));
+
+          if (tasks.length > 0) {
+            if (
+              tasks.length > 1 &&
+              !document.getElementById("delete-all-button")
+            ) {
+              const btnDeleteALl = document.createElement("button");
+              btnDeleteALl.id = "delete-all-button";
+              btnDeleteALl.textContent = "Hapus Semua";
+              btnDeleteALl.className =
+                "text-red-500 bg-[#000000] px-2 py-1 rounded-md text-[#4px] hover:bg-red-500 hover:text-white";
+              btnDeleteALl.onclick = () => {
+                const deleteall = window.confirm(
+                  "Are you sure you want to delete all tasks?"
+                );
+                if (!deleteall) {
+                  return;
+                }
+
+                localStorage.setItem("tasks", JSON.stringify([]));
+                refreshTasks();
+              };
+              titleDaftarTugas.appendChild(btnDeleteALl);
+            }
+            countTask.textContent = "(" + tasks.length + ")";
+          } else {
+            countTask.textContent = "(0)";
+          }
+
+          if (tasks.length <= 0) {
+            kumpulanDaftarTugas.innerHTML = `
+          <div class="text-center mt-10">
+            <p class="text-2xl" >Tidak ada tugas</p>
+            <p class="text-2xl" >Silahkan Isi Tugas Baru</p>
+            <button class=" text-white rounded-lg p-2 text-2xl font-semibold text-black hover:text-black hover:underline  transition" onclick="onFocusInput()">Isi Tugas</button>
+          </div>
+          `;
+          }
+        }
+      };
+
+      const refreshTasks = () => {
+        kumpulanDaftarTugas.innerHTML = "";
+        loadTasks();
+        updateStatistics();
+      };
+
+      const deleteTask = (id) => {
+        const confirmDelete = window.confirm(
+          "Are you sure you want to delete this task?"
+        );
+
+        if (!confirmDelete) {
+          return;
+        }
+
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks = tasks.filter((task) => task.id !== id);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        refreshTasks();
+      };
+
+      const markAsCompleted = (id) => {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks.find((t) => t.id == id);
+        task.completed = !task.completed;
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        refreshTasks();
+      };
+
+      const displayTask = (task) => {
+        // const kumpulanDaftartugas = document.getElementById(
+        //   "kumpulan-daftar-tugas"
+        // );
+        const tugasContainer = document.createElement("div");
+        tugasContainer.className =
+          "mb-3 border-b-[1px] border-black p-4 flex flex-col gap-2 px-10";
+
+        const tugasName = document.createElement("h1");
+        tugasName.textContent = "- " + task.name;
+        tugasName.className = "text-2xl font-semibold ";
+        tugasContainer.appendChild(tugasName);
+
+        const tugasPriority = document.createElement("p");
+        tugasPriority.textContent = "Prioritas : " + task.priority;
+        tugasContainer.appendChild(tugasPriority);
+
+        const tugasDeadline = document.createElement("p");
+        tugasDeadline.textContent = "Tenggat Tanggal : " + task.deadline;
+        tugasContainer.appendChild(tugasDeadline);
+
+        const tugasCompleted = document.createElement("p");
+        const completed = task.completed ? "Selesai" : "Belum Selesai";
+        tugasCompleted.textContent = "Keterangan : " + completed;
+        tugasContainer.appendChild(tugasCompleted);
+
+        const markAsCompletedButton = document.createElement("button");
+        const isDone = task.completed ? "Belum Selesai" : "Selesai";
+        markAsCompletedButton.textContent = "Tandai Sebagai " + isDone;
+        markAsCompletedButton.className =
+          "bg-black text-green-500 rounded-lg px-3 py-1 hover:bg-green-600 hover:text-black transition w-fit";
+        markAsCompletedButton.onclick = () => markAsCompleted(task.id);
+        tugasContainer.appendChild(markAsCompletedButton);
+
+        const containerButton = document.createElement("div");
+        containerButton.className = "flex gap-2";
+        tugasContainer.appendChild(containerButton);
+
+        const btnEdit = document.createElement("a");
+        btnEdit.textContent = "Edit";
+        btnEdit.className =
+          "bg-black text-blue-500 rounded-lg px-3 py-1 hover:bg-blue-600  hover:text-black transition w-fit cursor-pointer";
+        btnEdit.onclick = () => {
+          // btnEdit.href = "#form-tugas";
+          edit(task.id);
+          // tambahTugas.focus();
+        };
+        containerButton.appendChild(btnEdit);
+
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "Hapus";
+        btnDelete.className =
+          "bg-black text-red-500 rounded-lg px-3 py-1 hover:bg-red-600 hover:text-black transition w-fit";
+        btnDelete.onclick = () => deleteTask(task.id);
+        containerButton.appendChild(btnDelete);
+
+        kumpulanDaftarTugas.appendChild(tugasContainer);
+      };
+
+      // const edit = (id) => {
+      //   const editjudul = document.getElementById("tambah-tugas");
+      //   const editpriority = document.getElementById("tambah-prioritas");
+      //   const buttonForm = document.getElementById("button-form");
+      //   const tenggat = document.getElementById("tenggat-tanggal");
+
+      //   let tasks = localStorage.getItem("tasks") || [];
+      //   const task = tasks.find((t) => t.id == id);
+
+      //   editjudul.value = task.name;
+      //   editpriority.value = task.priority;
+      //   tenggat.value = task.deadline;
+
+      //   buttonForm.textContent = "Simpan";
+
+      //   // buttonForm.onclick = () => {
+      //   //   task.name = editjudul.value;
+      //   //   task.priority = editpriority.value;
+      //   //   task.deadline = tenggat.value;
+      //   //   saveTask(task);
+      //   //   refreshTasks();
+      //   // };
+
+      //   localStorage.setItem("tasks", JSON.stringify(tasks));
+      //   refreshTasks();
+      // };
+
+      const updateTask = (id, task) => {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks = tasks.map((t) => (t.id === id ? task : t));
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        refreshTasks();
+      };
+
+      // const toggleCancelButton = () => {
+      //   const cancelButton = document.getElementById("cancel-button");
+      //   if (cancelButton) {
+      //     cancelButton.style.display = "none";
+      //   } else {
+      //     cancelButton.style.display = "none";
+      //   }
+      // };
+
+      const cancelButton = document.createElement("button");
+      cancelButton.id = "cancel-button";
+      cancelButton.textContent = "Cancel";
+      cancelButton.style.display = "none";
+      cancelButton.className =
+        "bg-black text-red-500 rounded-lg px-3 py-1 hover:bg-red-600 hover:text-black transition w-fit";
+      cancelButton.onclick = () => {
+        resetTask();
+        cancelButton.style.display = "none";
+        refreshTasks();
+      };
+      conButtonForm.appendChild(cancelButton);
+
+      const edit = (id) => {
+        // Get the tasks from local storage and parse it as an array
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks.find((t) => t.id === id);
+
+        console.log(task);
+
+        // If the task is found, update the input fields with its values
+        if (task) {
+          titleForm.textContent = "Edit Task";
+          editjudul.value = task.name;
+          onFocusInput(editjudul.value);
+          cancelButton.style.display = "block";
+          // editjudul.focus();
+          taskPriority.value = task.priority;
+          tenggat.value = task.deadline;
+
+          buttonForm.textContent = "Simpan";
+
+          buttonForm.onclick = () => {
+            task.name = editjudul.value;
+            task.priority = taskPriority.value;
+            task.deadline = tenggat.value;
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            updateTask(id, task);
+            refreshTasks();
+            resetTask();
+            buttonForm.textContent = "Tambah";
+
+            buttonForm.onclick = addTask;
+
+            titleForm.textContent = "Add Task";
+            editjudul.value = "";
+            taskPriority.value = "";
+            tenggat.value = "";
+          };
+        }
+      };
+
+      const displayFilteredTasks = (tasks) => {
+        kumpulanDaftarTugas.innerHTML = "";
+        tasks.forEach((task) => {
+          displayTask(task);
+        });
+      };
+
+      const filterActive = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks.filter((task) => !task.completed);
+        filterFound(filteredTasks);
+      };
+
+      const filterCompleted = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks.filter((task) => task.completed);
+        filterFound(filteredTasks);
+      };
+
+      const filterAll = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        displayFilteredTasks(tasks);
+        filterFound(tasks);
+      };
+
+      const filterFound = (task) => {
+        if (task.length <= 0) {
+          kumpulanDaftarTugas.innerHTML = `
+            <div class="text-center mt-10">
+              <p class="text-2xl" >Tidak ada tugas dengan filter ini</p>
+            </div>
+              `;
+        } else {
+          displayFilteredTasks(task);
+        }
+      };
+
+      const filterDate = (date) => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks.filter((task) => task.deadline === date);
+        filterFound(filteredTasks);
+      };
+
+      const filterPriority = (priority) => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks.filter(
+          (task) => task.priority === priority
+        );
+        filterFound(filteredTasks);
+      };
+
+      const filterClosest = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks
+          .filter((task) => !task.completed)
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        filterFound(filteredTasks);
+      };
+
+      const filterFarthest = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks
+          .filter((task) => !task.completed)
+          .sort((a, b) => new Date(b.deadline) - new Date(a.deadline));
+        filterFound(filteredTasks);
+      };
+
+      const filterPastDue = () => {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const filteredTasks = tasks
+          .filter(
+            (task) => !task.completed && new Date(task.deadline) < Date.now()
+          )
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline)); // Urutkan dari yang paling lama terlewat
+        filterFound(filteredTasks);
+      };
+
+      // const filterButtons = () => {
+      const filterTugas = document.getElementById("filter-tugas");
+      filterTugas.className =
+        "flex flex-wrap gap-2 justify-start items-center py-5";
+      const filterTitle = document.createElement("h1");
+      filterTitle.textContent = "Filter :";
+      filterTugas.appendChild(filterTitle);
+      const filterAllButton = document.createElement("button");
+      filterAllButton.textContent = "Semua";
+      filterAllButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterAllButton);
+      filterAllButton.onclick = filterAll;
+
+      const filterCompletedButton = document.createElement("button");
+      filterCompletedButton.textContent = "Selesai";
+      filterCompletedButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterCompletedButton);
+      filterCompletedButton.onclick = filterCompleted;
+
+      const filterActiveButton = document.createElement("button");
+      filterActiveButton.textContent = "Belum Selesai";
+      filterActiveButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterActiveButton);
+      filterActiveButton.onclick = filterActive;
+
+      const filterPriorityLow = document.createElement("button");
+      filterPriorityLow.textContent = "Prioritas Rendah";
+      filterPriorityLow.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterPriorityLow.onclick = () => filterPriority("Rendah");
+      filterTugas.appendChild(filterPriorityLow);
+
+      const filterPriorityMedium = document.createElement("button");
+      filterPriorityMedium.textContent = "Prioritas Sedang";
+      filterPriorityMedium.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterPriorityMedium.onclick = () => filterPriority("Sedang");
+      filterTugas.appendChild(filterPriorityMedium);
+
+      const filterPriorityHigh = document.createElement("button");
+      filterPriorityHigh.textContent = "Prioritas Tinggi";
+      filterPriorityHigh.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterPriorityHigh.onclick = () => filterPriority("Tinggi");
+      filterTugas.appendChild(filterPriorityHigh);
+
+      const filterDateButton = document.createElement("button");
+      filterDateButton.textContent = "Tenggat-hari-ini";
+      filterDateButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterDateButton);
+      filterDateButton.onclick = () => {
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, "0"); // Menambahkan leading zero jika diperlukan
+        const month = String(today.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+        const year = today.getFullYear();
+
+        const formattedDate = `${year}-${month}-${day}`;
+        filterDate(formattedDate);
+        console.log(formattedDate);
+        // filterDate(new Date().toISOString().split("T")[0]);
+      };
+
+      const filterClosestButton = document.createElement("button");
+      filterClosestButton.textContent = "Terdekat";
+      filterClosestButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterClosestButton);
+      filterClosestButton.onclick = filterClosest;
+
+      const filterFarthestButton = document.createElement("button");
+      filterFarthestButton.textContent = "Terjauh";
+      filterFarthestButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterFarthestButton);
+      filterFarthestButton.onclick = filterFarthest;
+
+      const filterPastDueButton = document.createElement("button");
+      filterPastDueButton.textContent = "Terlambat";
+      filterPastDueButton.className =
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+      filterTugas.appendChild(filterPastDueButton);
+      filterPastDueButton.onclick = filterPastDue;
+      // };
+
+      // displayTask({
+      //   id: Date.now(),
+      //   name: "To do List",
+      //   priority: "Tinggi",
+      //   deadline: "2022-01-01",
+      //   completed: false,
+      // });
+
+      const onFocusInput = (text) => {
+        tambahTugas.value = text;
+        tambahTugas.focus();
+      };
+
+      window.onload = () => {
+        loadTasks();
+        updateStatistics();
+        if (tasks.length <= 0) {
+          kumpulanDaftarTugas.innerHTML = `
+      <div class="text-center mt-10">
+        <p class="text-2xl">Tidak ada tugas</p>
+        <p class="text-2xl">Silahkan Isi Tugas Baru</p>
+        <button class="text-white rounded-lg p-2 text-2xl font-semibold text-black hover:text-black hover:underline transition" onclick="onFocusInput('')">Isi Tugas</button>
+      </div>
+    `;
+        }
+      };
+    </script>
+  </body>
+</html>
