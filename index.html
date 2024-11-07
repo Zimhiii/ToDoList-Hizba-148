@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       .active-filter {
-        background-color: white; /* Latar belakang putih */
-        color: black; /* Teks hitam */
-        border: 1px solid black; /* Border hitam */
+        background-color: white;
+        color: black;
+        border: 1px solid black;
       }
     </style>
   </head>
@@ -122,7 +122,6 @@
 
       const editjudul = document.getElementById("tambah-tugas");
       editjudul.value = "";
-      // const buttonForm = document.getElementById("button-form");
       const tenggat = document.getElementById("tenggat-tanggal");
       tenggat.value = "";
 
@@ -194,7 +193,6 @@
 
       const loadTasks = () => {
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        // tasks.forEach(displayTask);
         tasks.map((task, index) => displayTask(task, index));
         if (localStorage.getItem("tasks")) {
           const tasks = JSON.parse(localStorage.getItem("tasks"));
@@ -269,9 +267,6 @@
       };
 
       const displayTask = (task, index) => {
-        // const kumpulanDaftartugas = document.getElementById(
-        //   "kumpulan-daftar-tugas"
-        // );
         const tugasContainer = document.createElement("div");
         tugasContainer.className =
           "mb-3 border-b-[1px] border-black p-4 flex flex-col gap-2 px-10";
@@ -311,9 +306,7 @@
         btnEdit.className =
           "bg-black text-blue-500 rounded-lg px-3 py-1 hover:bg-blue-600  hover:text-black transition w-fit cursor-pointer";
         btnEdit.onclick = () => {
-          // btnEdit.href = "#form-tugas";
           edit(task.id);
-          // tambahTugas.focus();
         };
         containerButton.appendChild(btnEdit);
 
@@ -327,48 +320,12 @@
         kumpulanDaftarTugas.appendChild(tugasContainer);
       };
 
-      // const edit = (id) => {
-      //   const editjudul = document.getElementById("tambah-tugas");
-      //   const editpriority = document.getElementById("tambah-prioritas");
-      //   const buttonForm = document.getElementById("button-form");
-      //   const tenggat = document.getElementById("tenggat-tanggal");
-
-      //   let tasks = localStorage.getItem("tasks") || [];
-      //   const task = tasks.find((t) => t.id == id);
-
-      //   editjudul.value = task.name;
-      //   editpriority.value = task.priority;
-      //   tenggat.value = task.deadline;
-
-      //   buttonForm.textContent = "Simpan";
-
-      //   // buttonForm.onclick = () => {
-      //   //   task.name = editjudul.value;
-      //   //   task.priority = editpriority.value;
-      //   //   task.deadline = tenggat.value;
-      //   //   saveTask(task);
-      //   //   refreshTasks();
-      //   // };
-
-      //   localStorage.setItem("tasks", JSON.stringify(tasks));
-      //   refreshTasks();
-      // };
-
       const updateTask = (id, task) => {
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         tasks = tasks.map((t) => (t.id === id ? task : t));
         localStorage.setItem("tasks", JSON.stringify(tasks));
         refreshTasks();
       };
-
-      // const toggleCancelButton = () => {
-      //   const cancelButton = document.getElementById("cancel-button");
-      //   if (cancelButton) {
-      //     cancelButton.style.display = "none";
-      //   } else {
-      //     cancelButton.style.display = "none";
-      //   }
-      // };
 
       const cancelButton = document.createElement("button");
       cancelButton.id = "cancel-button";
@@ -384,19 +341,16 @@
       conButtonForm.appendChild(cancelButton);
 
       const edit = (id) => {
-        // Get the tasks from local storage and parse it as an array
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const task = tasks.find((t) => t.id === id);
 
         console.log(task);
 
-        // If the task is found, update the input fields with its values
         if (task) {
           titleForm.textContent = "Edit Task";
           editjudul.value = task.name;
           onFocusInput(editjudul.value);
           cancelButton.style.display = "block";
-          // editjudul.focus();
           taskPriority.value = task.priority;
           tenggat.value = task.deadline;
 
@@ -487,62 +441,41 @@
         );
 
         filterFound(filteredTasks);
-        // if (priority == "Tinggi") {
-        //   updateActiveFilter(filterPriorityHigh);
-        // } else if (priority == "Sedang") {
-        //   updateActiveFilter(filterPriorityMedium);
-        // } else if (priority == "Rendah") {
-        //   updateActiveFilter(filterPriorityLow);
-        // }
+        if (priority == "Tinggi") {
+          updateActiveFilter(filterPriorityHigh);
+        } else if (priority == "Sedang") {
+          updateActiveFilter(filterPriorityMedium);
+        } else if (priority == "Rendah") {
+          updateActiveFilter(filterPriorityLow);
+        }
       };
-
-      // const filterClosest = () => {
-      //   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-      //   const filteredTasks = tasks
-      //     .filter((task) => !task.completed)
-      //     .sort((a, b) => {
-      //       const dateA = new Date(a.deadline);
-      //       const dateB = new Date(b.deadline);
-      //       return dateA - dateB; // Urutkan dari yang terdekat
-      //     });
-      //   filterFound(filteredTasks);
-      // };
-
-      // const filterFarthest = () => {
-      //   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-      //   const filteredTasks = tasks
-      //   .filter((task) => !task.completed)
-      //   .sort((a, b) => {
-      //     const dateA = new Date(a.deadline);
-      //     const dateB = new Date(b.deadline);
-      //     return dateB - dateA; // Urutkan dari yang terjauh
-      //   });
-      //   filterFound(filteredTasks);
-      // };
 
       const filterClosest = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
         const filteredTasks = tasks
           .filter((task) => !task.completed)
           .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
         updateActiveFilter(filterClosestButton);
         filterFound(filteredTasks);
       };
 
       const filterFarthest = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
         const filteredTasks = tasks
           .filter((task) => !task.completed)
           .sort((a, b) => new Date(b.deadline) - new Date(a.deadline));
-        filterFound(filteredTasks);
-        console.log("Comparing:", dateA, dateB);
+
         updateActiveFilter(filterFarthestButton);
+        filterFound(filteredTasks);
       };
 
       const filterPastDue = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set waktu ke 00:00 untuk tanggal hari ini
+        today.setHours(0, 0, 0, 0);
 
         const filteredTasks = tasks
           .filter(
@@ -550,28 +483,24 @@
               !task.completed &&
               new Date(task.deadline).setHours(0, 0, 0, 0) < today
           )
-          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline)); // Urutkan dari yang paling lama terlewat
-
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
         filterFound(filteredTasks);
         updateActiveFilter(filterPastDueButton);
       };
 
-      let activeFilter = null; // Menyimpan filter yang aktif
+      let activeFilter = null;
 
       const updateActiveFilter = (filterButton) => {
-        // Hapus kelas aktif dari semua button filter
         const allFilterButtons = document.querySelectorAll(".filter-button");
         allFilterButtons.forEach((button) => {
           button.classList.remove("active-filter", "bg-white", "text-black");
           button.classList.add("bg-black", "text-white");
         });
 
-        // Tambahkan kelas aktif pada button yang dipilih
         filterButton.classList.remove("bg-black", "text-white");
         filterButton.classList.add("bg-white", "text-black", "active-filter");
       };
 
-      // const filterButtons = () => {
       const filterTugas = document.getElementById("filter-tugas");
       filterTugas.className =
         "flex flex-wrap gap-2 justify-start items-center py-5";
@@ -635,14 +564,13 @@
       filterDateButton.dataset.filter = "date-today";
       filterDateButton.onclick = () => {
         const today = new Date();
-        const day = String(today.getDate()).padStart(2, "0"); // Menambahkan leading zero jika diperlukan
-        const month = String(today.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+        const day = String(today.getDate()).padStart(2, "0");
+        const month = String(today.getMonth() + 1).padStart(2, "0");
         const year = today.getFullYear();
 
         const formattedDate = `${year}-${month}-${day}`;
         filterDate(formattedDate);
         console.log(formattedDate);
-        // filterDate(new Date().toISOString().split("T")[0]);
       };
 
       const filterClosestButton = document.createElement("button");
@@ -668,15 +596,6 @@
       filterTugas.appendChild(filterPastDueButton);
       filterPastDueButton.onclick = filterPastDue;
       filterPastDueButton.dataset.filter = "past-due";
-      // };
-
-      // displayTask({
-      //   id: Date.now(),
-      //   name: "To do List",
-      //   priority: "Tinggi",
-      //   deadline: "2022-01-01",
-      //   completed: false,
-      // });
 
       const onFocusInput = (text) => {
         tambahTugas.value = text;
