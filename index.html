@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .active-filter {
+        background-color: white; /* Latar belakang putih */
+        color: black; /* Teks hitam */
+        border: 1px solid black; /* Border hitam */
+      }
+    </style>
   </head>
   <body class="w-full min-h-screen relative h-[200vh]">
     <header
@@ -16,7 +23,7 @@
       </div>
     </header>
 
-    <main class="py-10 px-20">
+    <main class="py-5 px-5 md:py-10 md:px-20">
       <div class="flex flex-col gap-4 mb-6 ring-1 ring-black p-10 rounded-md">
         <div id="form-tugas">
           <h1 id="title-form-tugas" class="text-2xl font-semibold mb-3">
@@ -81,7 +88,7 @@
           <button
             onclick="addTask()"
             id="button-form"
-            class="rounded-lg px-4 py-2 bg-black text-white ring-1 ring-black w-fit"
+            class="rounded-lg px-4 py-2 bg-black text-white ring-1 ring-black w-fit hover:bg-white hover:text-black transition active:bg-[#D9D9D9]"
           ></button>
         </div>
       </div>
@@ -152,6 +159,15 @@
       };
 
       const addTask = () => {
+        if (
+          !tambahTugas.value ||
+          !tenggatTanggal.value ||
+          !taskPriority.value
+        ) {
+          alert("Mohon lengkapi semua data");
+          return;
+        }
+
         const task = {
           id: Date.now(),
           name: tambahTugas.value,
@@ -179,7 +195,7 @@
       const loadTasks = () => {
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         // tasks.forEach(displayTask);
-        tasks.map((task) => displayTask(task));
+        tasks.map((task, index) => displayTask(task, index));
         if (localStorage.getItem("tasks")) {
           const tasks = JSON.parse(localStorage.getItem("tasks"));
 
@@ -252,7 +268,7 @@
         refreshTasks();
       };
 
-      const displayTask = (task) => {
+      const displayTask = (task, index) => {
         // const kumpulanDaftartugas = document.getElementById(
         //   "kumpulan-daftar-tugas"
         // );
@@ -261,7 +277,7 @@
           "mb-3 border-b-[1px] border-black p-4 flex flex-col gap-2 px-10";
 
         const tugasName = document.createElement("h1");
-        tugasName.textContent = "- " + task.name;
+        tugasName.textContent = `${index + 1}. ` + task.name;
         tugasName.className = "text-2xl font-semibold ";
         tugasContainer.appendChild(tugasName);
 
@@ -387,6 +403,14 @@
           buttonForm.textContent = "Simpan";
 
           buttonForm.onclick = () => {
+            if (
+              !tambahTugas.value ||
+              !tenggatTanggal.value ||
+              !taskPriority.value
+            ) {
+              alert("Mohon lengkapi semua data");
+              return;
+            }
             task.name = editjudul.value;
             task.priority = taskPriority.value;
             task.deadline = tenggat.value;
@@ -395,6 +419,7 @@
             updateTask(id, task);
             refreshTasks();
             resetTask();
+            cancelButton.style.display = "none";
             buttonForm.textContent = "Tambah";
 
             buttonForm.onclick = addTask;
@@ -409,8 +434,8 @@
 
       const displayFilteredTasks = (tasks) => {
         kumpulanDaftarTugas.innerHTML = "";
-        tasks.forEach((task) => {
-          displayTask(task);
+        tasks.forEach((task, index) => {
+          displayTask(task, index);
         });
       };
 
@@ -418,18 +443,22 @@
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const filteredTasks = tasks.filter((task) => !task.completed);
         filterFound(filteredTasks);
+        updateActiveFilter(filterActiveButton);
       };
 
       const filterCompleted = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const filteredTasks = tasks.filter((task) => task.completed);
         filterFound(filteredTasks);
+        updateActiveFilter(filterCompletedButton);
       };
 
       const filterAll = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         displayFilteredTasks(tasks);
         filterFound(tasks);
+
+        updateActiveFilter(filterAllButton);
       };
 
       const filterFound = (task) => {
@@ -448,6 +477,7 @@
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const filteredTasks = tasks.filter((task) => task.deadline === date);
         filterFound(filteredTasks);
+        updateActiveFilter(filterDateButton);
       };
 
       const filterPriority = (priority) => {
@@ -455,14 +485,47 @@
         const filteredTasks = tasks.filter(
           (task) => task.priority === priority
         );
+
         filterFound(filteredTasks);
+        // if (priority == "Tinggi") {
+        //   updateActiveFilter(filterPriorityHigh);
+        // } else if (priority == "Sedang") {
+        //   updateActiveFilter(filterPriorityMedium);
+        // } else if (priority == "Rendah") {
+        //   updateActiveFilter(filterPriorityLow);
+        // }
       };
+
+      // const filterClosest = () => {
+      //   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      //   const filteredTasks = tasks
+      //     .filter((task) => !task.completed)
+      //     .sort((a, b) => {
+      //       const dateA = new Date(a.deadline);
+      //       const dateB = new Date(b.deadline);
+      //       return dateA - dateB; // Urutkan dari yang terdekat
+      //     });
+      //   filterFound(filteredTasks);
+      // };
+
+      // const filterFarthest = () => {
+      //   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      //   const filteredTasks = tasks
+      //   .filter((task) => !task.completed)
+      //   .sort((a, b) => {
+      //     const dateA = new Date(a.deadline);
+      //     const dateB = new Date(b.deadline);
+      //     return dateB - dateA; // Urutkan dari yang terjauh
+      //   });
+      //   filterFound(filteredTasks);
+      // };
 
       const filterClosest = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
         const filteredTasks = tasks
           .filter((task) => !task.completed)
           .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        updateActiveFilter(filterClosestButton);
         filterFound(filteredTasks);
       };
 
@@ -472,16 +535,40 @@
           .filter((task) => !task.completed)
           .sort((a, b) => new Date(b.deadline) - new Date(a.deadline));
         filterFound(filteredTasks);
+        console.log("Comparing:", dateA, dateB);
+        updateActiveFilter(filterFarthestButton);
       };
 
       const filterPastDue = () => {
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set waktu ke 00:00 untuk tanggal hari ini
+
         const filteredTasks = tasks
           .filter(
-            (task) => !task.completed && new Date(task.deadline) < Date.now()
+            (task) =>
+              !task.completed &&
+              new Date(task.deadline).setHours(0, 0, 0, 0) < today
           )
           .sort((a, b) => new Date(a.deadline) - new Date(b.deadline)); // Urutkan dari yang paling lama terlewat
+
         filterFound(filteredTasks);
+        updateActiveFilter(filterPastDueButton);
+      };
+
+      let activeFilter = null; // Menyimpan filter yang aktif
+
+      const updateActiveFilter = (filterButton) => {
+        // Hapus kelas aktif dari semua button filter
+        const allFilterButtons = document.querySelectorAll(".filter-button");
+        allFilterButtons.forEach((button) => {
+          button.classList.remove("active-filter", "bg-white", "text-black");
+          button.classList.add("bg-black", "text-white");
+        });
+
+        // Tambahkan kelas aktif pada button yang dipilih
+        filterButton.classList.remove("bg-black", "text-white");
+        filterButton.classList.add("bg-white", "text-black", "active-filter");
       };
 
       // const filterButtons = () => {
@@ -491,53 +578,61 @@
       const filterTitle = document.createElement("h1");
       filterTitle.textContent = "Filter :";
       filterTugas.appendChild(filterTitle);
+
       const filterAllButton = document.createElement("button");
       filterAllButton.textContent = "Semua";
       filterAllButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterAllButton);
       filterAllButton.onclick = filterAll;
+      filterAllButton.dataset.filter = "all";
 
       const filterCompletedButton = document.createElement("button");
       filterCompletedButton.textContent = "Selesai";
       filterCompletedButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterCompletedButton);
       filterCompletedButton.onclick = filterCompleted;
+      filterCompletedButton.dataset.filter = "completed";
 
       const filterActiveButton = document.createElement("button");
       filterActiveButton.textContent = "Belum Selesai";
       filterActiveButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterActiveButton);
       filterActiveButton.onclick = filterActive;
+      filterActiveButton.dataset.filter = "active";
 
       const filterPriorityLow = document.createElement("button");
       filterPriorityLow.textContent = "Prioritas Rendah";
       filterPriorityLow.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterPriorityLow.onclick = () => filterPriority("Rendah");
+      filterPriorityLow.dataset.filter = "priority-low";
       filterTugas.appendChild(filterPriorityLow);
 
       const filterPriorityMedium = document.createElement("button");
       filterPriorityMedium.textContent = "Prioritas Sedang";
       filterPriorityMedium.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterPriorityMedium.onclick = () => filterPriority("Sedang");
+      filterPriorityMedium.dataset.filter = "priority-medium";
       filterTugas.appendChild(filterPriorityMedium);
 
       const filterPriorityHigh = document.createElement("button");
       filterPriorityHigh.textContent = "Prioritas Tinggi";
       filterPriorityHigh.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterPriorityHigh.onclick = () => filterPriority("Tinggi");
+      filterPriorityHigh.dataset.filter = "priority-high";
       filterTugas.appendChild(filterPriorityHigh);
 
       const filterDateButton = document.createElement("button");
       filterDateButton.textContent = "Tenggat-hari-ini";
       filterDateButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterDateButton);
+      filterDateButton.dataset.filter = "date-today";
       filterDateButton.onclick = () => {
         const today = new Date();
         const day = String(today.getDate()).padStart(2, "0"); // Menambahkan leading zero jika diperlukan
@@ -553,23 +648,26 @@
       const filterClosestButton = document.createElement("button");
       filterClosestButton.textContent = "Terdekat";
       filterClosestButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterClosestButton);
       filterClosestButton.onclick = filterClosest;
+      filterClosestButton.dataset.filter = "closest";
 
       const filterFarthestButton = document.createElement("button");
       filterFarthestButton.textContent = "Terjauh";
       filterFarthestButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterFarthestButton);
       filterFarthestButton.onclick = filterFarthest;
+      filterClosestButton.dataset.filter = "farthest";
 
       const filterPastDueButton = document.createElement("button");
       filterPastDueButton.textContent = "Terlambat";
       filterPastDueButton.className =
-        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black";
+        "p-2 bg-black text-white rounded-lg hover:bg-white hover:text-black transition hover:ring-1 hover:ring-black filter-button";
       filterTugas.appendChild(filterPastDueButton);
       filterPastDueButton.onclick = filterPastDue;
+      filterPastDueButton.dataset.filter = "past-due";
       // };
 
       // displayTask({
@@ -593,7 +691,7 @@
       <div class="text-center mt-10">
         <p class="text-2xl">Tidak ada tugas</p>
         <p class="text-2xl">Silahkan Isi Tugas Baru</p>
-        <button class="text-white rounded-lg p-2 text-2xl font-semibold text-black hover:text-black hover:underline transition" onclick="onFocusInput('')">Isi Tugas</button>
+        <button class="text-white rounded-lg p-2 text-2xl font-bold text-black hover:text-black hover:underline transition" onclick="onFocusInput('')">Isi Tugas !</button>
       </div>
     `;
         }
